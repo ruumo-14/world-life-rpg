@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#18251d" />
+    <meta name="description" content="World Life RPG - 冒険・生活・交流が広がるオンラインRPG" />
+    <title>World Life RPG</title>
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar">
+        <div class="brand"><span class="brand-mark">W</span><span>WORLD LIFE RPG</span></div>
+        <div class="connection"><span class="status-dot"></span>ローカル試作版</div>
+      </header>
+      <main class="game-layout">
+        <section class="game-panel">
+          <div class="panel-heading"><div><p class="eyebrow">ADVENTURE BEGINS</p><h1>はじまりの草原</h1></div><span class="region-tag">中央大陸・南部</span></div>
+          <div id="game-container" aria-label="ゲーム画面"></div>
+          <p class="hint">WASD / 矢印キーで移動できます</p>
+        </section>
+        <aside class="side-panel">
+          <section class="info-card"><p class="eyebrow">CHARACTER</p><h2>冒険者</h2><div class="level-row"><span>Lv. 1</span><span>EXP 0 / 100</span></div><div class="meter"><i></i></div><p class="muted">キャラクター作成・成長システムは開発予定</p></section>
+          <section class="info-card"><p class="eyebrow">STATUS</p><div class="stat-line"><span>HP</span><strong>100 / 100</strong></div><div class="stat-line"><span>MP</span><strong>50 / 50</strong></div><div class="stat-line"><span>所持金</span><strong>0 G</strong></div></section>
+          <section class="info-card"><p class="eyebrow">NOTICE</p><p>これは開発初期の動作確認用マップです。オンライン機能やセーブ機能はまだ接続されていません。</p></section>
+        </aside>
+      </main>
+      <footer>WORLD LIFE RPG <span>Development Build 0.1.0</span></footer>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
