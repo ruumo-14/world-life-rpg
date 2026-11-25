@@ -1,0 +1,32 @@
+:root{font-family:Inter,"Noto Sans JP",system-ui,sans-serif;color:#e9eee7;background:#111a15;font-synthesis:none;text-rendering:optimizeLegibility}
+*{box-sizing:border-box}
+body{margin:0;min-width:320px;min-height:100vh;background:radial-gradient(circle at 50% -20%,#263b2b,#111a15 65%)}
+#app{max-width:1320px;margin:0 auto;padding:0 28px}
+.topbar{height:72px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #ffffff18}
+.brand{display:flex;align-items:center;gap:12px;font-size:13px;font-weight:800;letter-spacing:.13em}
+.brand-mark{display:grid;place-items:center;width:32px;height:32px;border-radius:10px;background:#b8d18d;color:#1b2b1e;font-family:Georgia,serif;font-size:21px}
+.connection{font-size:12px;color:#b7c6b5;display:flex;align-items:center;gap:8px}
+.status-dot{width:7px;height:7px;border-radius:50%;background:#e3b96e}
+.game-layout{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:22px;padding:28px 0}
+.game-panel,.info-card{background:#1b2920;border:1px solid #ffffff12;border-radius:16px}
+.game-panel{padding:18px}
+.panel-heading{display:flex;justify-content:space-between;align-items:end;margin-bottom:15px}
+.eyebrow{font-size:10px;letter-spacing:.16em;color:#9bb18f;font-weight:800;margin:0 0 7px}
+h1{font-size:22px;margin:0;color:#f0f3e9}
+.region-tag{font-size:11px;color:#c5d2b9;background:#ffffff0d;border:1px solid #ffffff12;border-radius:20px;padding:7px 10px}
+#game-container{width:100%;overflow:hidden;border-radius:10px;background:#9fca83;aspect-ratio:760/500}
+#game-container canvas{display:block;width:100%!important;height:100%!important}
+.hint{font-size:11px;color:#9eae9d;margin:11px 2px 0}
+.side-panel{display:flex;flex-direction:column;gap:14px}
+.info-card{padding:17px}
+.info-card h2{font-size:17px;margin:0 0 15px}
+.level-row,.stat-line{display:flex;justify-content:space-between;font-size:12px;margin:9px 0;color:#dce5d7}
+.level-row{color:#b8c9ae}
+.meter{height:6px;border-radius:9px;background:#ffffff17;overflow:hidden}
+.meter i{display:block;width:0;height:100%;background:#b8d18d}
+.muted{font-size:11px;line-height:1.6;color:#91a18f;margin:13px 0 0}
+.stat-line strong{font-weight:650;color:#edf1e8}
+.info-card>p:last-child:not(.eyebrow){font-size:11px;line-height:1.7;color:#a8b7a5;margin-bottom:0}
+footer{border-top:1px solid #ffffff18;padding:18px 0 24px;color:#829282;font-size:10px;letter-spacing:.08em;display:flex;justify-content:space-between}
+@media(max-width:800px){#app{padding:0 14px}.game-layout{grid-template-columns:1fr;padding:18px 0}.side-panel{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.side-panel .info-card:last-child{grid-column:1/-1}.game-panel{padding:12px}.panel-heading{align-items:start;gap:8px;flex-direction:column}}
+@media(max-width:480px){.side-panel{grid-template-columns:1fr}.side-panel .info-card:last-child{grid-column:auto}.brand{font-size:11px}.connection{font-size:10px}footer{font-size:9px}}
