@@ -11,21 +11,48 @@
     <div id="app">
       <header class="topbar">
         <div class="brand"><span class="brand-mark">W</span><span>WORLD LIFE RPG</span></div>
-        <div class="connection"><span class="status-dot"></span>ローカル試作版</div>
+        <div class="connection"><span class="status-dot"></span><span id="status-text">接続確認中...</span></div>
       </header>
-      <main class="game-layout">
-        <section class="game-panel">
-          <div class="panel-heading"><div><p class="eyebrow">ADVENTURE BEGINS</p><h1>はじまりの草原</h1></div><span class="region-tag">中央大陸・南部</span></div>
-          <div id="game-container" aria-label="ゲーム画面"></div>
-          <p class="hint">WASD / 矢印キーで移動できます</p>
+      <main>
+        <section id="auth-panel" class="account-panel" hidden>
+          <p class="eyebrow">WELCOME ADVENTURER</p>
+          <h1>冒険を始めよう</h1>
+          <p class="intro">アカウントを作成するか、既存のアカウントでログインしてください。</p>
+          <form id="auth-form">
+            <label>メールアドレス<input name="email" type="email" autocomplete="email" required maxlength="254" /></label>
+            <label>パスワード<input name="password" type="password" autocomplete="current-password" minlength="6" required /></label>
+            <label>冒険者の表示名（新規登録時）<input name="displayName" type="text" maxlength="20" placeholder="冒険者" /></label>
+            <div class="form-actions">
+              <button type="submit" class="primary" data-mode="login">ログイン</button>
+              <button type="submit" class="secondary" data-mode="signup">新規登録</button>
+            </div>
+            <input type="hidden" name="mode" value="login" />
+          </form>
         </section>
-        <aside class="side-panel">
-          <section class="info-card"><p class="eyebrow">CHARACTER</p><h2>冒険者</h2><div class="level-row"><span>Lv. 1</span><span>EXP 0 / 100</span></div><div class="meter"><i></i></div><p class="muted">キャラクター作成・成長システムは開発予定</p></section>
-          <section class="info-card"><p class="eyebrow">STATUS</p><div class="stat-line"><span>HP</span><strong>100 / 100</strong></div><div class="stat-line"><span>MP</span><strong>50 / 50</strong></div><div class="stat-line"><span>所持金</span><strong>0 G</strong></div></section>
-          <section class="info-card"><p class="eyebrow">NOTICE</p><p>これは開発初期の動作確認用マップです。オンライン機能やセーブ機能はまだ接続されていません。</p></section>
-        </aside>
+        <section id="character-panel" class="account-panel" hidden>
+          <p class="eyebrow">CREATE CHARACTER</p>
+          <h1>冒険者を作成</h1>
+          <p class="intro">この世界で使うキャラクターの名前を決めてください（1〜16文字）。</p>
+          <form id="character-form">
+            <label>キャラクター名<input name="characterName" type="text" minlength="1" maxlength="16" required placeholder="名前を入力" /></label>
+            <button type="submit" class="primary">キャラクターを作成</button>
+          </form>
+        </section>
+        <p id="message" class="message" role="status" aria-live="polite"></p>
+        <div id="game-layout" class="game-layout" hidden>
+          <section class="game-panel">
+            <div class="panel-heading"><div><p class="eyebrow">ADVENTURE BEGINS</p><h1>はじまりの草原</h1></div><span class="region-tag">中央大陸・南部</span></div>
+            <div id="game-container" aria-label="ゲーム画面"></div>
+            <p class="hint">WASD / 矢印キーで移動できます。位置は約5秒ごとに保存されます。</p>
+          </section>
+          <aside class="side-panel">
+            <section class="info-card"><p class="eyebrow">CHARACTER</p><h2 id="player-name">冒険者</h2><div class="level-row"><span id="level-text">Lv. 1</span><span id="exp-text">EXP 0</span></div><div class="meter"><i></i></div><p class="muted">キャラクター情報はアカウントに保存されます。</p></section>
+            <section class="info-card"><p class="eyebrow">STATUS</p><div class="stat-line"><span>HP</span><strong>100 / 100</strong></div><div class="stat-line"><span>MP</span><strong>50 / 50</strong></div><div class="stat-line"><span>所持金</span><strong>0 G</strong></div></section>
+            <section class="info-card"><p class="eyebrow">NOTICE</p><p>現在は初期開発版です。戦闘・アイテム・オンライン同期はこれから実装します。</p><button id="logout-button" class="secondary logout-button" hidden>ログアウト</button></section>
+          </aside>
+        </div>
       </main>
-      <footer>WORLD LIFE RPG <span>Development Build 0.1.0</span></footer>
+      <footer>WORLD LIFE RPG <span>Development Build 0.2.0</span></footer>
     </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
