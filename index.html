@@ -17,11 +17,10 @@
         <section id="auth-panel" class="account-panel" hidden>
           <p class="eyebrow">WELCOME ADVENTURER</p>
           <h1>冒険を始めよう</h1>
-          <p class="intro">アカウントを作成するか、既存のアカウントでログインしてください。</p>
+          <p class="intro">ユーザー名とパスワードだけで登録・ログインできます。</p>
           <form id="auth-form">
-            <label>メールアドレス<input name="email" type="email" autocomplete="email" required maxlength="254" /></label>
-            <label>パスワード<input name="password" type="password" autocomplete="current-password" minlength="6" required /></label>
-            <label>冒険者の表示名（新規登録時）<input name="displayName" type="text" maxlength="20" placeholder="冒険者" /></label>
+            <label>ユーザー名（半角英数字と _・3〜16文字）<input name="username" type="text" autocomplete="username" required minlength="3" maxlength="16" pattern="[A-Za-z0-9_]{3,16}" /></label>
+            <label>パスワード（6文字以上）<input name="password" type="password" autocomplete="current-password" minlength="6" required /></label>
             <div class="form-actions">
               <button type="submit" class="primary" data-mode="login">ログイン</button>
               <button type="submit" class="secondary" data-mode="signup">新規登録</button>
