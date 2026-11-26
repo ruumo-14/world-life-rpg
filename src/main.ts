@@ -1,7 +1,7 @@
 import Phaser from "phaser";
 import "./style.css";
 import { supabase, isSupabaseConfigured } from "./lib/supabase";
-import type { User } from "@supabase/supabase-js";
+import type { User, RealtimeChannel } from "@supabase/supabase-js";
 
 type Character = {
   id: string;
@@ -18,6 +18,8 @@ class MeadowScene extends Phaser.Scene {
   private player!: Phaser.GameObjects.Container;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private keys!: Record<string, Phaser.Input.Keyboard.Key>;
+  private remotePlayers = new Map<string, Phaser.GameObjects.Container>();
+  private obstacles: Phaser.Geom.Rectangle[] = [];
 
   constructor() { super("Meadow"); }
 
@@ -47,10 +49,35 @@ class MeadowScene extends Phaser.Scene {
     graphics.lineStyle(3, 0xd5e9d8, 0.8);
     graphics.strokeEllipse(width * 0.78, height * 0.22, 112, 58);
 
+    // 木、岩、建物は見た目と同じ位置に当たり判定を置く
+    const treeX = width * 0.2;
+    const treeY = height * 0.3;
     graphics.fillStyle(0x795438, 1);
-    graphics.fillRect(width * 0.2, height * 0.3, 5, 24);
+    graphics.fillRect(treeX - 4, treeY, 8, 25);
+    graphics.fillStyle(0x397b48, 1);
+    graphics.fillCircle(treeX, treeY - 5, 17);
     graphics.fillStyle(0xe8d6a5, 1);
-    graphics.fillRoundedRect(width * 0.2 - 12, height * 0.29, 30, 13, 3);
+    graphics.fillRoundedRect(treeX - 15, treeY - 17, 30, 13, 3);
+    this.obstacles = [
+      new Phaser.Geom.Rectangle(treeX - 15, treeY - 5, 30, 35),
+      new Phaser.Geom.Rectangle(width * 0.68 - 36, height * 0.58 - 27, 72, 58),
+      new Phaser.Geom.Rectangle(width * 0.43 - 15, height * 0.48 - 12, 30, 24),
+      new Phaser.Geom.Rectangle(width * 0.83 - 17, height * 0.78 - 13, 34, 26)
+    ];
+    const houseX = width * 0.68;
+    const houseY = height * 0.58;
+    graphics.fillStyle(0x9a704d, 1);
+    graphics.fillRect(houseX - 32, houseY - 8, 64, 38);
+    graphics.fillStyle(0x744638, 1);
+    graphics.fillTriangle(houseX - 39, houseY - 8, houseX, houseY - 35, houseX + 39, houseY - 8);
+    graphics.fillStyle(0x4a3428, 1);
+    graphics.fillRect(houseX - 7, houseY + 8, 14, 22);
+    graphics.fillStyle(0x87949a, 1);
+    graphics.fillCircle(width * 0.43, height * 0.48, 13);
+    graphics.fillCircle(width * 0.83, height * 0.78, 15);
+    graphics.fillStyle(0xb8c0b7, 1);
+    graphics.fillCircle(width * 0.425, height * 0.47, 5);
+    graphics.fillCircle(width * 0.825, height * 0.77, 6);
 
     this.player = this.add.container(width / 2, height / 2);
     const shadow = this.add.ellipse(1, 8, 23, 10, 0x34513a, 0.25);
@@ -68,6 +95,46 @@ class MeadowScene extends Phaser.Scene {
       fontFamily: "sans-serif", fontSize: "14px", color: "#24432d",
       backgroundColor: "#ffffffbb", padding: { x: 8, y: 5 }
     }).setScrollFactor(0).setDepth(20);
+  }
+
+  addRemotePlayer(id: string, name: string, x: number, y: number) {
+    if (!id || id === currentUser?.id) return;
+    let avatar = this.remotePlayers.get(id);
+    if (!avatar) {
+      avatar = this.add.container(x, y);
+      const shadow = this.add.ellipse(1, 8, 23, 10, 0x34513a, 0.25);
+      const body = this.add.circle(0, 0, 10, 0xc47b45).setStrokeStyle(2, 0xffffff, 0.9);
+      const face = this.add.circle(0, -2, 3, 0xf4dfc4);
+      const label = this.add.text(0, -25, name.slice(0, 16), {
+        fontFamily: "sans-serif", fontSize: "11px", color: "#ffffff",
+        backgroundColor: "#263b2bcc", padding: { x: 4, y: 2 }
+      }).setOrigin(0.5);
+      avatar.add([shadow, body, face, label]);
+      avatar.setDepth(11);
+      this.remotePlayers.set(id, avatar);
+    }
+    avatar.setPosition(Phaser.Math.Clamp(x, 12, this.scale.width - 12), Phaser.Math.Clamp(y, 18, this.scale.height - 12));
+    const label = avatar.list[3] as Phaser.GameObjects.Text;
+    label.setText(name.slice(0, 16));
+  }
+
+  updateRemotePlayer(id: string, name: string, x: number, y: number) {
+    this.addRemotePlayer(id, name, x, y);
+  }
+
+  removeMissingRemotePlayers(activeIds: Set<string>) {
+    for (const [id, avatar] of this.remotePlayers) {
+      if (!activeIds.has(id)) {
+        avatar.destroy();
+        this.remotePlayers.delete(id);
+      }
+    }
+  }
+
+  private canMoveTo(x: number, y: number) {
+    return !this.obstacles.some((rect) =>
+      x > rect.x - 12 && x < rect.right + 12 && y > rect.y - 12 && y < rect.bottom + 12
+    );
   }
 
   setPlayerPosition(x: number, y: number) {
@@ -91,8 +158,10 @@ class MeadowScene extends Phaser.Scene {
     if (this.cursors.up.isDown || this.keys.W.isDown) dy -= 1;
     if (this.cursors.down.isDown || this.keys.S.isDown) dy += 1;
     const length = Math.hypot(dx, dy) || 1;
-    this.player.x = Phaser.Math.Clamp(this.player.x + (dx / length) * speed * delta / 1000, 12, this.scale.width - 12);
-    this.player.y = Phaser.Math.Clamp(this.player.y + (dy / length) * speed * delta / 1000, 18, this.scale.height - 12);
+    const nextX = Phaser.Math.Clamp(this.player.x + (dx / length) * speed * delta / 1000, 12, this.scale.width - 12);
+    const nextY = Phaser.Math.Clamp(this.player.y + (dy / length) * speed * delta / 1000, 18, this.scale.height - 12);
+    if (this.canMoveTo(nextX, this.player.y)) this.player.x = nextX;
+    if (this.canMoveTo(this.player.x, nextY)) this.player.y = nextY;
   }
 }
 
@@ -123,6 +192,10 @@ const isConfigured = isSupabaseConfigured;
 let currentUser: User | null = null;
 let currentCharacter: Character | null = null;
 let lastSavedPosition = "";
+let worldChannel: RealtimeChannel | null = null;
+let worldChannelUserId = "";
+let lastBroadcastPosition = "";
+let lastPresenceTrackAt = 0;
 
 function showMessage(text: string, isError = false) {
   message.textContent = text;
@@ -138,6 +211,47 @@ function updateCharacterUI(character: Character) {
   playerName.textContent = character.name;
   levelText.textContent = `Lv. ${character.level}`;
   expText.textContent = `EXP ${character.experience}`;
+}
+
+function connectWorldChannel(user: User, character: Character) {
+  if (!supabase) return;
+  if (worldChannel && worldChannelUserId === user.id) return;
+  if (worldChannel) void supabase.removeChannel(worldChannel);
+  worldChannelUserId = user.id;
+  lastBroadcastPosition = "";
+  const scene = game.scene.getScene("Meadow") as MeadowScene;
+  const channel = supabase.channel(`world:${character.region_id}`, {
+    config: { broadcast: { self: false }, presence: { key: user.id } }
+  });
+  worldChannel = channel;
+  channel
+    .on("presence", { event: "sync" }, () => {
+      const active = new Set<string>();
+      const state = channel.presenceState() as Record<string, Array<Record<string, unknown>>>;
+      for (const entries of Object.values(state)) {
+        for (const entry of entries) {
+          const id = String(entry.user_id || "");
+          if (!id || id === user.id) continue;
+          active.add(id);
+          scene.addRemotePlayer(id, String(entry.name || "冒険者"), Number(entry.x) || 380, Number(entry.y) || 250);
+        }
+      }
+      scene.removeMissingRemotePlayers(active);
+    })
+    .on("broadcast", { event: "player_move" }, ({ payload }) => {
+      const id = String(payload.user_id || "");
+      if (!id || id === user.id) return;
+      scene.updateRemotePlayer(id, String(payload.name || "冒険者"), Number(payload.x) || 380, Number(payload.y) || 250);
+    })
+    .subscribe(async (state) => {
+      if (state === "SUBSCRIBED") {
+        const pos = scene.getPlayerPosition();
+        await channel.track({ user_id: user.id, name: character.name, x: pos.x, y: pos.y });
+        statusText.textContent = "オンライン接続中";
+      } else if (state === "CHANNEL_ERROR" || state === "TIMED_OUT") {
+        statusText.textContent = "オンライン接続エラー";
+      }
+    });
 }
 function usernameToAuthEmail(username: string) {
   // Supabase Auth currently uses email/password; this reserved, non-deliverable
@@ -170,8 +284,13 @@ async function enterForUser(user: User) {
     showScreen("game");
     updateCharacterUI(currentCharacter);
     const scene = game.scene.getScene("Meadow") as MeadowScene;
-    if (scene.scene.isActive()) scene.setPlayerPosition(currentCharacter.position_x, currentCharacter.position_y);
-    else game.events.once("ready", () => scene.setPlayerPosition(currentCharacter!.position_x, currentCharacter!.position_y));
+    if (scene.scene.isActive()) {
+      scene.setPlayerPosition(currentCharacter.position_x, currentCharacter.position_y);
+      connectWorldChannel(user, currentCharacter);
+    } else game.events.once("ready", () => {
+      scene.setPlayerPosition(currentCharacter!.position_x, currentCharacter!.position_y);
+      connectWorldChannel(user, currentCharacter!);
+    });
     showMessage("");
   } catch (error) {
     showScreen("auth");
@@ -195,6 +314,12 @@ if (!isConfigured) {
     else {
       currentUser = null;
       currentCharacter = null;
+      if (worldChannel && supabase) void supabase.removeChannel(worldChannel);
+      worldChannel = null;
+      worldChannelUserId = "";
+      const scene = game.scene.getScene("Meadow") as MeadowScene;
+      scene.removeMissingRemotePlayers(new Set());
+      statusText.textContent = "ログアウト中";
       showScreen("auth");
     }
   });
@@ -272,7 +397,10 @@ characterForm.addEventListener("submit", async (event) => {
     updateCharacterUI(currentCharacter);
     showMessage("キャラクターを作成しました！");
     const scene = game.scene.getScene("Meadow") as MeadowScene;
-    if (scene.scene.isActive()) scene.setPlayerPosition(380, 250);
+    if (scene.scene.isActive()) {
+      scene.setPlayerPosition(380, 250);
+      connectWorldChannel(currentUser, currentCharacter);
+    }
   } catch (error) {
     showMessage(error instanceof Error ? error.message : "キャラクター作成に失敗しました。", true);
   } finally {
@@ -285,6 +413,23 @@ logoutButton.addEventListener("click", async () => {
   const { error } = await supabase.auth.signOut();
   if (error) showMessage(error.message, true);
 });
+
+window.setInterval(() => {
+  if (!worldChannel || !currentUser || !currentCharacter || !game.scene.isActive("Meadow")) return;
+  const scene = game.scene.getScene("Meadow") as MeadowScene;
+  const pos = scene.getPlayerPosition();
+  const key = `${pos.x},${pos.y}`;
+  if (key !== lastBroadcastPosition) {
+    lastBroadcastPosition = key;
+    void worldChannel.send({ type: "broadcast", event: "player_move", payload: {
+      user_id: currentUser.id, name: currentCharacter.name, x: pos.x, y: pos.y
+    } });
+  }
+  if (Date.now() - lastPresenceTrackAt > 3000) {
+    lastPresenceTrackAt = Date.now();
+    void worldChannel.track({ user_id: currentUser.id, name: currentCharacter.name, x: pos.x, y: pos.y });
+  }
+}, 200);
 
 window.setInterval(async () => {
   if (!supabase || !currentUser || !currentCharacter || !game.scene.isActive("Meadow")) return;
