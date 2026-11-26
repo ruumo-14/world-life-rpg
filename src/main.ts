@@ -139,9 +139,14 @@ function updateCharacterUI(character: Character) {
   levelText.textContent = `Lv. ${character.level}`;
   expText.textContent = `EXP ${character.experience}`;
 }
+function usernameToAuthEmail(username: string) {
+  // Supabase Auth currently uses email/password; this reserved, non-deliverable
+  // address lets players sign in with a username without collecting email.
+  return `${username.toLowerCase()}@accounts.world-life-rpg.invalid`;
+}
 async function loadOrCreateProfile(user: User) {
   if (!supabase) return;
-  const displayName = String(user.user_metadata?.display_name || user.email?.split("@")[0] || "冒険者").slice(0, 20);
+  const displayName = String(user.user_metadata?.username || user.email?.split("@")[0] || "冒険者").slice(0, 20);
   const { error } = await supabase.from("profiles").upsert({ id: user.id, display_name: displayName }, { onConflict: "id" });
   if (error) throw error;
 }
@@ -206,27 +211,44 @@ authForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!supabase) return showMessage("Supabaseの接続設定がありません。", true);
   const form = new FormData(authForm);
-  const email = String(form.get("email") || "").trim();
+  const username = String(form.get("username") || "").trim();
   const password = String(form.get("password") || "");
-  const displayName = String(form.get("displayName") || "冒険者").trim().slice(0, 20);
   const mode = String(form.get("mode") || "login");
-  const submit = authForm.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+  if (!/^[a-zA-Z0-9_]{3,16}$/.test(username)) {
+    return showMessage("ユーザー名は半角英数字と _ の3〜16文字で入力してください。", true);
+  }
+  if (password.length < 6) return showMessage("パスワードは6文字以上で入力してください。", true);
+  const email = usernameToAuthEmail(username);
+  const submit = authForm.querySelector<HTMLButtonElement>('button[type="submit"]:focus') ||
+    authForm.querySelector<HTMLButtonElement>('button[type="submit"]')!;
   submit.disabled = true;
   try {
     if (mode === "signup") {
       const { data, error } = await supabase.auth.signUp({
-        email, password, options: { data: { display_name: displayName } }
+        email,
+        password,
+        options: { data: { username: username.toLowerCase(), display_name: username } }
       });
       if (error) throw error;
-      if (data.session) await enterForUser(data.session.user);
-      else showMessage("登録メールを送信しました。メール内の確認リンクを開いてからログインしてください。");
+      if (data.session) {
+        await enterForUser(data.session.user);
+      } else {
+        showMessage("登録処理は完了しましたが、メール確認が有効になっています。SupabaseのAuthentication設定でConfirm emailをOFFにしてください。", true);
+      }
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
       showMessage("ログインしました。");
     }
   } catch (error) {
-    showMessage(error instanceof Error ? error.message : "認証に失敗しました。", true);
+    const detail = error instanceof Error ? error.message : "認証に失敗しました。";
+    if (/already registered|already been registered|user already registered/i.test(detail)) {
+      showMessage("このユーザー名は既に使われています。別の名前を選んでください。", true);
+    } else if (/invalid login credentials/i.test(detail)) {
+      showMessage("ユーザー名またはパスワードが違います。", true);
+    } else {
+      showMessage(detail, true);
+    }
   } finally {
     submit.disabled = false;
   }
