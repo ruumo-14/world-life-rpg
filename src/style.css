@@ -6,13 +6,27 @@ body{margin:0;min-width:320px;min-height:100vh;background:radial-gradient(circle
 .brand{display:flex;align-items:center;gap:12px;font-size:13px;font-weight:800;letter-spacing:.13em}
 .brand-mark{display:grid;place-items:center;width:32px;height:32px;border-radius:10px;background:#b8d18d;color:#1b2b1e;font-family:Georgia,serif;font-size:21px}
 .connection{font-size:12px;color:#b7c6b5;display:flex;align-items:center;gap:8px}
-.status-dot{width:7px;height:7px;border-radius:50%;background:#e3b96e}
+.status-dot{width:7px;height:7px;border-radius:50%;background:#b8d18d}
+.account-panel{max-width:480px;margin:58px auto 18px;padding:28px;background:#1b2920;border:1px solid #ffffff18;border-radius:16px}
+h1{font-size:24px;margin:0;color:#f0f3e9}
+.eyebrow{font-size:10px;letter-spacing:.16em;color:#9bb18f;font-weight:800;margin:0 0 9px}
+.intro{font-size:13px;line-height:1.7;color:#a8b7a5;margin:12px 0 22px}
+form{display:flex;flex-direction:column;gap:15px}
+label{display:flex;flex-direction:column;gap:7px;font-size:12px;color:#cbd7c7}
+input{width:100%;padding:12px 13px;border-radius:8px;border:1px solid #ffffff24;background:#111a15;color:#f0f3e9;font:inherit;outline:none}
+input:focus{border-color:#b8d18d}
+.form-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button{border:0;border-radius:8px;padding:12px 15px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+button:disabled{opacity:.55;cursor:wait}
+.primary{background:#b8d18d;color:#1b2b1e}
+.secondary{background:#344638;color:#e9eee7;border:1px solid #ffffff18}
+.message{max-width:480px;margin:12px auto 22px;min-height:20px;font-size:12px;line-height:1.6;color:#b8d18d}
+.message[data-type="error"]{color:#ffaaa0}
 .game-layout{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:22px;padding:28px 0}
 .game-panel,.info-card{background:#1b2920;border:1px solid #ffffff12;border-radius:16px}
 .game-panel{padding:18px}
 .panel-heading{display:flex;justify-content:space-between;align-items:end;margin-bottom:15px}
-.eyebrow{font-size:10px;letter-spacing:.16em;color:#9bb18f;font-weight:800;margin:0 0 7px}
-h1{font-size:22px;margin:0;color:#f0f3e9}
+.panel-heading h1{font-size:22px}
 .region-tag{font-size:11px;color:#c5d2b9;background:#ffffff0d;border:1px solid #ffffff12;border-radius:20px;padding:7px 10px}
 #game-container{width:100%;overflow:hidden;border-radius:10px;background:#9fca83;aspect-ratio:760/500}
 #game-container canvas{display:block;width:100%!important;height:100%!important}
@@ -26,7 +40,9 @@ h1{font-size:22px;margin:0;color:#f0f3e9}
 .meter i{display:block;width:0;height:100%;background:#b8d18d}
 .muted{font-size:11px;line-height:1.6;color:#91a18f;margin:13px 0 0}
 .stat-line strong{font-weight:650;color:#edf1e8}
-.info-card>p:last-child:not(.eyebrow){font-size:11px;line-height:1.7;color:#a8b7a5;margin-bottom:0}
+.info-card>p:last-of-type{font-size:11px;line-height:1.7;color:#a8b7a5}
+.logout-button{width:100%;margin-top:10px}
 footer{border-top:1px solid #ffffff18;padding:18px 0 24px;color:#829282;font-size:10px;letter-spacing:.08em;display:flex;justify-content:space-between}
+[hidden]{display:none!important}
 @media(max-width:800px){#app{padding:0 14px}.game-layout{grid-template-columns:1fr;padding:18px 0}.side-panel{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.side-panel .info-card:last-child{grid-column:1/-1}.game-panel{padding:12px}.panel-heading{align-items:start;gap:8px;flex-direction:column}}
-@media(max-width:480px){.side-panel{grid-template-columns:1fr}.side-panel .info-card:last-child{grid-column:auto}.brand{font-size:11px}.connection{font-size:10px}footer{font-size:9px}}
+@media(max-width:480px){.side-panel{grid-template-columns:1fr}.side-panel .info-card:last-child{grid-column:auto}.brand{font-size:11px}.connection{font-size:10px}footer{font-size:9px}.account-panel{margin:30px auto 15px;padding:21px}}
