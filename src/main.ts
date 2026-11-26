@@ -195,6 +195,13 @@ if (!isConfigured) {
   });
 }
 
+authForm.querySelectorAll<HTMLButtonElement>("button[data-mode]").forEach((button) => {
+  button.addEventListener("click", () => {
+    const modeInput = authForm.querySelector<HTMLInputElement>('input[name="mode"]');
+    if (modeInput) modeInput.value = button.dataset.mode || "login";
+  });
+});
+
 authForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!supabase) return showMessage("Supabaseの接続設定がありません。", true);
